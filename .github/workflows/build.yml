@@ -1,0 +1,52 @@
+name: Build and Release EXE
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags:
+      - 'v*' # Triggers a Release only when you push a tag like v1.0, v2.3, etc.
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    name: Build Executable
+    runs-on: windows-latest
+
+    steps:
+    # 1. Check out the repository code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. Set up Python environment
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' # Use a stable recent version
+
+    # 3. Install dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 colorama tqdm pyinstaller
+
+    # 4. Build the executable with PyInstaller
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller --onefile --name "ROM_Downloader" rom_downloader.py
+
+    # 5. Upload the EXE as an Artifact (Available on every commit in 'Actions' tab)
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ROM_Downloader_Exe
+        path: dist/ROM_Downloader.exe
+
+    # 6. Create a GitHub Release (Only runs if a tag like v1.0 is pushed)
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/ROM_Downloader.exe
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
