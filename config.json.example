@@ -1,0 +1,16 @@
+{
+    "INPUT_PATH": "D:/Folder/or/Single/DAT/file.dat",
+    "URL_MAPPING_FILE": "url_mapping.txt",
+    "DOWNLOAD_FOLDER": "D:/Downloads",
+    "TIMEOUT": 60,
+    "RETRY_DELAY": 5,
+    "MAX_RETRIES": 3,
+    "DELETE_EMPTY_DATS": true,
+    "FOLDER_PERMISSIONS": 511,
+    "FILE_PERMISSIONS": 438,
+    "SUB_THREAD_WORKERS": 3,
+    "FUZZY_THRESHOLD": 0.9,
+    "RECURSION_DEPTH": 2,
+    "INTERACTIVE_MODE": true,
+    "MAIN_THREADS": 4
+}

@@ -1,0 +1,10 @@
+# Build specifications
+ROM_Downloader.spec
+
+# Configuration and mappings
+config.json
+url_mapping.txt
+
+# Directories
+dist/
+build/
