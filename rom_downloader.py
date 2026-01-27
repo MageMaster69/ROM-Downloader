@@ -438,9 +438,24 @@ def download_file(url, destination_path, file_display_name="Unknown"):
             except Exception: pass
 
 def get_fuzzy_match(target_name, candidates, threshold=0.9):
-    matches = get_close_matches(target_name, candidates.keys(), n=1, cutoff=threshold)
-    if matches:
-        return matches[0], candidates[matches[0]]
+    # 1. Ask for top 3 matches (instead of 1). 
+    #    If the 1st match has wrong numbers, we can check the 2nd.
+    matches = get_close_matches(target_name, candidates.keys(), n=3, cutoff=threshold)
+    
+    # Helper: extracts a set of numbers from a string (e.g. "Game 01-96" -> {'01', '96'})
+    def get_numbers(s):
+        return set(re.findall(r'\d+', s))
+
+    target_nums = get_numbers(target_name)
+
+    for match in matches:
+        match_nums = get_numbers(match)
+        
+        # 2. THE GUARD: Only accept the match if the numbers are identical
+        #    This prevents "Vol 1" matching "Vol 2"
+        if target_nums == match_nums:
+            return match, candidates[match]
+            
     return None, None
 
 def _process_file_target(target, game_name, aggregated_links, subfolder_path):
