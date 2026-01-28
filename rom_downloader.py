@@ -632,9 +632,17 @@ def run_downloader():
 
         source_urls = _resolve_dat_source_urls(dat_name, url_mappings, available_links_cache, CONFIG["INTERACTIVE_MODE"])
         
+        if dat_name not in url_mappings or not url_mappings[dat_name]:
+            source_urls = _resolve_dat_source_urls(dat_name, url_mappings, available_links_cache, CONFIG["INTERACTIVE_MODE"])
+        else:
+            source_urls = _resolve_dat_source_urls(dat_name, url_mappings, available_links_cache, False)
+
         if not source_urls:
-            log.warning(f"{Fore.RED}[SKIP] No URL mapping found for '{dat_name}'{Style.RESET_ALL}")
-            missing_mapping_dats.append(dat_name)
+            if dat_name in url_mappings and url_mappings[dat_name] and url_mappings[dat_name] != ['none']:
+                log.warning(f"{Fore.RED}[FAIL] Mapping exists but no links found. Check the URL content: {url_mappings[dat_name]}{Style.RESET_ALL}")
+            else:
+                log.warning(f"{Fore.RED}[SKIP] No URL mapping found for '{dat_name}'{Style.RESET_ALL}")
+                missing_mapping_dats.append(dat_name)
             continue
 
         subfolder_name = _sanitize_for_path(dat_name)
@@ -686,9 +694,6 @@ def run_downloader():
         for d in missing_mapping_dats:
             print(f" - {d}")
         print(f"{Fore.YELLOW}(Enable Interactive Mode to fix these on next run){Style.RESET_ALL}")
-
-    print("\nPress Enter to exit...")
-    input()
 
 # --- CONFIG GUI CLASS ---
 class ConfigGUI:
@@ -901,3 +906,15 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nInterrupted.")
         sys.exit(0)
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        print("\n" + "!" * 60)
+        print(" [CRITICAL ERROR] The script crashed unexpectedly.")
+        print(" See the error trace above for details.")
+        print("!" * 60)
+        input("Press Enter to exit...")
+        sys.exit(1)
+    finally:
+        print("\nPress Enter to exit...")
+        input()
