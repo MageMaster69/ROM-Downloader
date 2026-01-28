@@ -252,11 +252,17 @@ def extract_download_urls_from_profile(profile_url):
 
     try:
         soup = BeautifulSoup(response.text, "html.parser")
+        search_area = soup
+        if "archive.org" in urlparse(profile_url).netloc.lower():
+            main_content = soup.find("main", id="maincontent")
+            if main_content:
+                search_area = main_content
+
         found_urls = set()
         archive_link_pattern = re.compile(r"^/details/([^/@][^/]*)$")
         base_for_join = response.url if response.url.endswith('/') else response.url + '/'
 
-        for link in soup.find_all("a"):
+        for link in search_area.find_all("a"):
             href = link.get("href")
             if not href: continue
             absolute_href = urljoin(base_for_join, href)
@@ -375,9 +381,14 @@ def crawl_links_recursive(start_url, cache, max_depth, current_depth=0):
 
     try:
         soup = BeautifulSoup(response.text, "html.parser")
+        search_area = soup
+        if "archive.org" in urlparse(start_url).netloc.lower():
+            main_content = soup.find("main", id="maincontent")
+            if main_content:
+                search_area = main_content
         base_for_join = response.url if response.url.endswith('/') else response.url + '/'
 
-        for link in soup.find_all("a"):
+        for link in search_area.find_all("a"):
             href = link.get("href")
             if not href or href.strip() == '' or href.startswith(('?', '#', 'javascript:', 'mailto:')): continue
             if href in ['../', './', '/']: continue
@@ -397,7 +408,9 @@ def crawl_links_recursive(start_url, cache, max_depth, current_depth=0):
         if subfolders_to_scan and current_depth < max_depth:
             for folder_url in subfolders_to_scan:
                 sub_links = crawl_links_recursive(folder_url, cache, max_depth, current_depth + 1)
-                links.update(sub_links)
+                for k, v in sub_links.items():
+                    if k not in links:
+                        links[k] = v
 
         cache[start_url] = links
         return links
