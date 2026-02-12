@@ -15,7 +15,7 @@ from difflib import get_close_matches
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # --- VERSION ---
-VERSION = "0.2.1"
+VERSION = "0.2.2"
 
 # --- DEPENDENCY CHECK ---
 def check_dependencies():
